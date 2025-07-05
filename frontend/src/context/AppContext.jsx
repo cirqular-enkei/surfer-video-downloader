@@ -2,6 +2,9 @@ import React, { createContext, useContext, useReducer } from 'react'
 
 const AppContext = createContext()
 
+// Export the context for direct access if needed
+export { AppContext }
+
 const initialState = {
   recentDownloads: []
 }
