@@ -21,6 +21,14 @@ if (!fs.existsSync(DOWNLOAD_DIR)) {
 app.use(cors())
 app.use(express.json())
 
+// Serve static files from frontend build in production
+if (process.env.NODE_ENV === 'production') {
+  const frontendBuildPath = path.join(__dirname, '../../frontend/dist')
+  if (fs.existsSync(frontendBuildPath)) {
+    app.use(express.static(frontendBuildPath))
+  }
+}
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ success: true, status: 'ok', timestamp: new Date().toISOString() })
@@ -198,6 +206,26 @@ app.get('/api/download/:id', (req, res) => {
 app.get('/api/recent', (req, res) => {
   res.json({ success: true, downloads: recentDownloads })
 })
+
+// Catch-all handler for React Router (serve index.html for all non-API routes)
+if (process.env.NODE_ENV === 'production') {
+  const frontendBuildPath = path.join(__dirname, '../../frontend/dist')
+  const indexPath = path.join(frontendBuildPath, 'index.html')
+  
+  app.get('*', (req, res) => {
+    // Don't serve index.html for API routes
+    if (req.path.startsWith('/api/')) {
+      return res.status(404).json({ success: false, error: 'API endpoint not found.' })
+    }
+    
+    // Serve index.html for all other routes (React Router)
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath)
+    } else {
+      res.status(404).send('Frontend not built')
+    }
+  })
+}
 
 // Start server
 app.listen(PORT, () => {
