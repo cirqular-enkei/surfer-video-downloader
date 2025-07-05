@@ -23,22 +23,14 @@ app.use(express.json())
 
 // Serve static files from frontend build in production
 if (process.env.NODE_ENV === 'production') {
-  // Try multiple possible frontend build paths for Render deployment
-  // Since backend starts from backend/ directory, we need to look relative to that
-  // The frontend build happens in /opt/render/project/src/frontend/dist
-  // But backend starts from /opt/render/project/src/backend/
+  // Simplified path resolution for Render deployment
+  // The build process creates frontend/dist/ in the project root
+  // Backend starts from the project root, so we look for frontend/dist/
   const possiblePaths = [
-    path.join(__dirname, '../../frontend/dist'), // /opt/render/project/src/frontend/dist (from backend/src/)
-    path.join(__dirname, '../frontend/dist'),    // /opt/render/project/src/backend/frontend/dist
-    path.join(__dirname, '../../../frontend/dist'), // /opt/render/project/src/frontend/dist (alternative)
-    path.join(__dirname, '../../dist'),          // /opt/render/project/src/dist
-    path.join(__dirname, '../dist'),             // /opt/render/project/src/backend/dist
-    path.join(__dirname, 'dist'),                // /opt/render/project/src/backend/src/dist
-    path.join(__dirname, '../../../dist'),       // /opt/render/project/src/dist (alternative)
-    path.join(__dirname, '../../../../frontend/dist'), // /opt/render/project/frontend/dist (from backend/src/)
-    path.join(__dirname, '../../../../dist'),    // /opt/render/project/dist (from backend/src/)
-    path.join(__dirname, '../../../../../frontend/dist'), // /opt/render/project/frontend/dist (alternative)
-    path.join(__dirname, '../../../../../dist')  // /opt/render/project/dist (alternative)
+    path.join(process.cwd(), 'frontend/dist'),     // From project root
+    path.join(__dirname, '../../frontend/dist'),   // From backend/src/
+    path.join(__dirname, '../frontend/dist'),      // Alternative from backend/src/
+    path.join(__dirname, '../../../frontend/dist') // Alternative from backend/src/
   ]
   
   let frontendBuildPath = null
@@ -263,19 +255,12 @@ app.get('/api/recent', (req, res) => {
 
 // Catch-all handler for React Router (serve index.html for all non-API routes)
 if (process.env.NODE_ENV === 'production') {
-  // Use the same path logic as above for consistency
+  // Use the same simplified path logic as above
   const possiblePaths = [
-    path.join(__dirname, '../../frontend/dist'), // /opt/render/project/src/frontend/dist (from backend/src/)
-    path.join(__dirname, '../frontend/dist'),    // /opt/render/project/src/backend/frontend/dist
-    path.join(__dirname, '../../../frontend/dist'), // /opt/render/project/src/frontend/dist (alternative)
-    path.join(__dirname, '../../dist'),          // /opt/render/project/src/dist
-    path.join(__dirname, '../dist'),             // /opt/render/project/src/backend/dist
-    path.join(__dirname, 'dist'),                // /opt/render/project/src/backend/src/dist
-    path.join(__dirname, '../../../dist'),       // /opt/render/project/src/dist (alternative)
-    path.join(__dirname, '../../../../frontend/dist'), // /opt/render/project/frontend/dist (from backend/src/)
-    path.join(__dirname, '../../../../dist'),    // /opt/render/project/dist (from backend/src/)
-    path.join(__dirname, '../../../../../frontend/dist'), // /opt/render/project/frontend/dist (alternative)
-    path.join(__dirname, '../../../../../dist')  // /opt/render/project/dist (alternative)
+    path.join(process.cwd(), 'frontend/dist'),     // From project root
+    path.join(__dirname, '../../frontend/dist'),   // From backend/src/
+    path.join(__dirname, '../frontend/dist'),      // Alternative from backend/src/
+    path.join(__dirname, '../../../frontend/dist') // Alternative from backend/src/
   ]
   
   let frontendBuildPath = null
