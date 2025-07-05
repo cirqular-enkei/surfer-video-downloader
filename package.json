@@ -15,17 +15,24 @@
     "test:backend": "cd backend && npm test"
   },
   "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "uuid": "^9.0.1",
     "concurrently": "^8.2.2"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
   },
   "keywords": [
-    "video-downloader",
+    "video",
+    "downloader",
+    "youtube",
+    "twitter",
+    "instagram",
+    "tiktok",
     "react",
     "express",
-    "nodejs",
-    "fullstack"
+    "nodejs"
   ],
   "author": "Surfer Team",
   "license": "MIT"
