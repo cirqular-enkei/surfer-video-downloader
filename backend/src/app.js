@@ -34,16 +34,23 @@ if (process.env.NODE_ENV === 'production') {
     path.join(__dirname, '../../dist'),          // /opt/render/project/src/dist
     path.join(__dirname, '../dist'),             // /opt/render/project/src/backend/dist
     path.join(__dirname, 'dist'),                // /opt/render/project/src/backend/src/dist
-    path.join(__dirname, '../../../dist')        // /opt/render/project/src/dist (alternative)
+    path.join(__dirname, '../../../dist'),       // /opt/render/project/src/dist (alternative)
+    path.join(__dirname, '../../../../frontend/dist'), // /opt/render/project/frontend/dist (from backend/src/)
+    path.join(__dirname, '../../../../dist'),    // /opt/render/project/dist (from backend/src/)
+    path.join(__dirname, '../../../../../frontend/dist'), // /opt/render/project/frontend/dist (alternative)
+    path.join(__dirname, '../../../../../dist')  // /opt/render/project/dist (alternative)
   ]
   
   let frontendBuildPath = null
   let indexPath = null
   
   console.log('Looking for frontend build in production...')
+  console.log('Current directory:', __dirname)
+  console.log('Working directory:', process.cwd())
+  
   for (const buildPath of possiblePaths) {
     const indexFile = path.join(buildPath, 'index.html')
-    console.log(`Checking: ${indexFile}`)
+    console.log(`Checking: ${indexFile} (exists: ${fs.existsSync(indexFile)})`)
     if (fs.existsSync(indexFile)) {
       frontendBuildPath = buildPath
       indexPath = indexFile
@@ -58,6 +65,21 @@ if (process.env.NODE_ENV === 'production') {
   } else {
     console.log('Frontend build not found in any expected location')
     console.log('Available paths checked:', possiblePaths.join(', '))
+    
+    // Try to list what's actually in the directories
+    console.log('Debugging directory contents:')
+    for (const buildPath of possiblePaths) {
+      try {
+        if (fs.existsSync(buildPath)) {
+          const contents = fs.readdirSync(buildPath)
+          console.log(`${buildPath}: ${contents.join(', ')}`)
+        } else {
+          console.log(`${buildPath}: directory does not exist`)
+        }
+      } catch (error) {
+        console.log(`${buildPath}: error reading directory - ${error.message}`)
+      }
+    }
   }
 }
 
@@ -249,7 +271,11 @@ if (process.env.NODE_ENV === 'production') {
     path.join(__dirname, '../../dist'),          // /opt/render/project/src/dist
     path.join(__dirname, '../dist'),             // /opt/render/project/src/backend/dist
     path.join(__dirname, 'dist'),                // /opt/render/project/src/backend/src/dist
-    path.join(__dirname, '../../../dist')        // /opt/render/project/src/dist (alternative)
+    path.join(__dirname, '../../../dist'),       // /opt/render/project/src/dist (alternative)
+    path.join(__dirname, '../../../../frontend/dist'), // /opt/render/project/frontend/dist (from backend/src/)
+    path.join(__dirname, '../../../../dist'),    // /opt/render/project/dist (from backend/src/)
+    path.join(__dirname, '../../../../../frontend/dist'), // /opt/render/project/frontend/dist (alternative)
+    path.join(__dirname, '../../../../../dist')  // /opt/render/project/dist (alternative)
   ]
   
   let frontendBuildPath = null
