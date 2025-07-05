@@ -24,19 +24,24 @@ app.use(express.json())
 // Serve static files from frontend build in production
 if (process.env.NODE_ENV === 'production') {
   // Try multiple possible frontend build paths for Render deployment
+  // Since backend starts from backend/ directory, we need to look relative to that
   const possiblePaths = [
-    path.join(__dirname, '../../frontend/dist'),
-    path.join(__dirname, '../frontend/dist'),
-    path.join(__dirname, '../../dist'),
-    path.join(__dirname, '../dist'),
-    path.join(__dirname, 'dist')
+    path.join(__dirname, '../../dist'),           // /opt/render/project/src/dist (from backend/src/)
+    path.join(__dirname, '../dist'),             // /opt/render/project/src/backend/dist
+    path.join(__dirname, '../../frontend/dist'), // /opt/render/project/src/frontend/dist
+    path.join(__dirname, '../frontend/dist'),    // /opt/render/project/src/backend/frontend/dist
+    path.join(__dirname, 'dist'),                // /opt/render/project/src/backend/src/dist
+    path.join(__dirname, '../../../dist'),       // /opt/render/project/src/dist (alternative)
+    path.join(__dirname, '../../../frontend/dist') // /opt/render/project/src/frontend/dist (alternative)
   ]
   
   let frontendBuildPath = null
   let indexPath = null
   
+  console.log('Looking for frontend build in production...')
   for (const buildPath of possiblePaths) {
     const indexFile = path.join(buildPath, 'index.html')
+    console.log(`Checking: ${indexFile}`)
     if (fs.existsSync(indexFile)) {
       frontendBuildPath = buildPath
       indexPath = indexFile
@@ -47,8 +52,10 @@ if (process.env.NODE_ENV === 'production') {
   
   if (frontendBuildPath) {
     app.use(express.static(frontendBuildPath))
+    console.log(`Serving static files from: ${frontendBuildPath}`)
   } else {
     console.log('Frontend build not found in any expected location')
+    console.log('Available paths checked:', possiblePaths.join(', '))
   }
 }
 
@@ -232,13 +239,15 @@ app.get('/api/recent', (req, res) => {
 
 // Catch-all handler for React Router (serve index.html for all non-API routes)
 if (process.env.NODE_ENV === 'production') {
-  // Try multiple possible frontend build paths for Render deployment
+  // Use the same path logic as above for consistency
   const possiblePaths = [
-    path.join(__dirname, '../../frontend/dist'),
-    path.join(__dirname, '../frontend/dist'),
-    path.join(__dirname, '../../dist'),
-    path.join(__dirname, '../dist'),
-    path.join(__dirname, 'dist')
+    path.join(__dirname, '../../dist'),           // /opt/render/project/src/dist (from backend/src/)
+    path.join(__dirname, '../dist'),             // /opt/render/project/src/backend/dist
+    path.join(__dirname, '../../frontend/dist'), // /opt/render/project/src/frontend/dist
+    path.join(__dirname, '../frontend/dist'),    // /opt/render/project/src/backend/frontend/dist
+    path.join(__dirname, 'dist'),                // /opt/render/project/src/backend/src/dist
+    path.join(__dirname, '../../../dist'),       // /opt/render/project/src/dist (alternative)
+    path.join(__dirname, '../../../frontend/dist') // /opt/render/project/src/frontend/dist (alternative)
   ]
   
   let frontendBuildPath = null
@@ -249,7 +258,7 @@ if (process.env.NODE_ENV === 'production') {
     if (fs.existsSync(indexFile)) {
       frontendBuildPath = buildPath
       indexPath = indexFile
-      console.log(`Found index.html at: ${indexFile}`)
+      console.log(`Found index.html for catch-all at: ${indexFile}`)
       break
     }
   }
