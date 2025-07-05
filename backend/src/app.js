@@ -25,14 +25,16 @@ app.use(express.json())
 if (process.env.NODE_ENV === 'production') {
   // Try multiple possible frontend build paths for Render deployment
   // Since backend starts from backend/ directory, we need to look relative to that
+  // The frontend build happens in /opt/render/project/src/frontend/dist
+  // But backend starts from /opt/render/project/src/backend/
   const possiblePaths = [
-    path.join(__dirname, '../../dist'),           // /opt/render/project/src/dist (from backend/src/)
-    path.join(__dirname, '../dist'),             // /opt/render/project/src/backend/dist
-    path.join(__dirname, '../../frontend/dist'), // /opt/render/project/src/frontend/dist
+    path.join(__dirname, '../../frontend/dist'), // /opt/render/project/src/frontend/dist (from backend/src/)
     path.join(__dirname, '../frontend/dist'),    // /opt/render/project/src/backend/frontend/dist
+    path.join(__dirname, '../../../frontend/dist'), // /opt/render/project/src/frontend/dist (alternative)
+    path.join(__dirname, '../../dist'),          // /opt/render/project/src/dist
+    path.join(__dirname, '../dist'),             // /opt/render/project/src/backend/dist
     path.join(__dirname, 'dist'),                // /opt/render/project/src/backend/src/dist
-    path.join(__dirname, '../../../dist'),       // /opt/render/project/src/dist (alternative)
-    path.join(__dirname, '../../../frontend/dist') // /opt/render/project/src/frontend/dist (alternative)
+    path.join(__dirname, '../../../dist')        // /opt/render/project/src/dist (alternative)
   ]
   
   let frontendBuildPath = null
@@ -241,13 +243,13 @@ app.get('/api/recent', (req, res) => {
 if (process.env.NODE_ENV === 'production') {
   // Use the same path logic as above for consistency
   const possiblePaths = [
-    path.join(__dirname, '../../dist'),           // /opt/render/project/src/dist (from backend/src/)
-    path.join(__dirname, '../dist'),             // /opt/render/project/src/backend/dist
-    path.join(__dirname, '../../frontend/dist'), // /opt/render/project/src/frontend/dist
+    path.join(__dirname, '../../frontend/dist'), // /opt/render/project/src/frontend/dist (from backend/src/)
     path.join(__dirname, '../frontend/dist'),    // /opt/render/project/src/backend/frontend/dist
+    path.join(__dirname, '../../../frontend/dist'), // /opt/render/project/src/frontend/dist (alternative)
+    path.join(__dirname, '../../dist'),          // /opt/render/project/src/dist
+    path.join(__dirname, '../dist'),             // /opt/render/project/src/backend/dist
     path.join(__dirname, 'dist'),                // /opt/render/project/src/backend/src/dist
-    path.join(__dirname, '../../../dist'),       // /opt/render/project/src/dist (alternative)
-    path.join(__dirname, '../../../frontend/dist') // /opt/render/project/src/frontend/dist (alternative)
+    path.join(__dirname, '../../../dist')        // /opt/render/project/src/dist (alternative)
   ]
   
   let frontendBuildPath = null
@@ -273,7 +275,47 @@ if (process.env.NODE_ENV === 'production') {
     if (indexPath && fs.existsSync(indexPath)) {
       res.sendFile(indexPath)
     } else {
-      res.status(404).send('Frontend not built. Available paths checked: ' + possiblePaths.join(', '))
+      // Fallback: Create a simple HTML response with API info
+      const html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Surfer - Video Downloader</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2563eb; margin-bottom: 20px; }
+        .api-info { background: #f8f9fa; padding: 20px; border-radius: 6px; margin: 20px 0; }
+        .endpoint { background: #e9ecef; padding: 10px; margin: 5px 0; border-radius: 4px; font-family: monospace; }
+        .error { color: #dc3545; background: #f8d7da; padding: 15px; border-radius: 6px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Surfer - Video Downloader</h1>
+        <p>Welcome to Surfer! The backend API is running successfully.</p>
+        
+        <div class="api-info">
+            <h3>Available API Endpoints:</h3>
+            <div class="endpoint">GET /api/health - Health check</div>
+            <div class="endpoint">GET /api/formats?url={video_url} - Get available formats</div>
+            <div class="endpoint">POST /api/download - Download video</div>
+            <div class="endpoint">GET /api/recent - Recent downloads</div>
+        </div>
+        
+        <div class="error">
+            <strong>Frontend Build Issue:</strong><br>
+            The frontend build files were not found. Available paths checked:<br>
+            ${possiblePaths.join('<br>')}
+        </div>
+        
+        <p><strong>Status:</strong> Backend API is running correctly. Frontend build needs to be deployed.</p>
+    </div>
+</body>
+</html>`
+      res.status(200).send(html)
     }
   })
 }
