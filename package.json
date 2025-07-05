@@ -2,7 +2,7 @@
   "name": "surfer",
   "version": "1.0.0",
   "description": "A full-stack web application for downloading videos from social media platforms",
-  "main": "index.js",
+  "main": "backend/src/app.js",
   "scripts": {
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "dev:frontend": "cd frontend && npm run dev",
@@ -14,10 +14,19 @@
     "test:frontend": "cd frontend && npm test",
     "test:backend": "cd backend && npm test"
   },
-  "keywords": ["video-downloader", "react", "nodejs", "express", "tailwind"],
-  "author": "Surfer Team",
-  "license": "MIT",
-  "devDependencies": {
+  "dependencies": {
     "concurrently": "^8.2.2"
-  }
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "keywords": [
+    "video-downloader",
+    "react",
+    "express",
+    "nodejs",
+    "fullstack"
+  ],
+  "author": "Surfer Team",
+  "license": "MIT"
 } 
