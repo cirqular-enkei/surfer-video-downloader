@@ -23,9 +23,32 @@ app.use(express.json())
 
 // Serve static files from frontend build in production
 if (process.env.NODE_ENV === 'production') {
-  const frontendBuildPath = path.join(__dirname, '../../frontend/dist')
-  if (fs.existsSync(frontendBuildPath)) {
+  // Try multiple possible frontend build paths for Render deployment
+  const possiblePaths = [
+    path.join(__dirname, '../../frontend/dist'),
+    path.join(__dirname, '../frontend/dist'),
+    path.join(__dirname, '../../dist'),
+    path.join(__dirname, '../dist'),
+    path.join(__dirname, 'dist')
+  ]
+  
+  let frontendBuildPath = null
+  let indexPath = null
+  
+  for (const buildPath of possiblePaths) {
+    const indexFile = path.join(buildPath, 'index.html')
+    if (fs.existsSync(indexFile)) {
+      frontendBuildPath = buildPath
+      indexPath = indexFile
+      console.log(`Found index.html at: ${indexFile}`)
+      break
+    }
+  }
+  
+  if (frontendBuildPath) {
     app.use(express.static(frontendBuildPath))
+  } else {
+    console.log('Frontend build not found in any expected location')
   }
 }
 
@@ -209,8 +232,27 @@ app.get('/api/recent', (req, res) => {
 
 // Catch-all handler for React Router (serve index.html for all non-API routes)
 if (process.env.NODE_ENV === 'production') {
-  const frontendBuildPath = path.join(__dirname, '../../frontend/dist')
-  const indexPath = path.join(frontendBuildPath, 'index.html')
+  // Try multiple possible frontend build paths for Render deployment
+  const possiblePaths = [
+    path.join(__dirname, '../../frontend/dist'),
+    path.join(__dirname, '../frontend/dist'),
+    path.join(__dirname, '../../dist'),
+    path.join(__dirname, '../dist'),
+    path.join(__dirname, 'dist')
+  ]
+  
+  let frontendBuildPath = null
+  let indexPath = null
+  
+  for (const buildPath of possiblePaths) {
+    const indexFile = path.join(buildPath, 'index.html')
+    if (fs.existsSync(indexFile)) {
+      frontendBuildPath = buildPath
+      indexPath = indexFile
+      console.log(`Found index.html at: ${indexFile}`)
+      break
+    }
+  }
   
   app.get('*', (req, res) => {
     // Don't serve index.html for API routes
@@ -219,10 +261,10 @@ if (process.env.NODE_ENV === 'production') {
     }
     
     // Serve index.html for all other routes (React Router)
-    if (fs.existsSync(indexPath)) {
+    if (indexPath && fs.existsSync(indexPath)) {
       res.sendFile(indexPath)
     } else {
-      res.status(404).send('Frontend not built')
+      res.status(404).send('Frontend not built. Available paths checked: ' + possiblePaths.join(', '))
     }
   })
 }
